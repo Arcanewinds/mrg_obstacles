@@ -19,9 +19,10 @@ pose_channel = 'BB2-14366971_pose_pb'; % Modify for your robot
 control_channel  = 'husky_plan';
 
 % Initialise mex-moos and register channels
+mexmoos('CLOSE');
 clear mexmoos
 host = '192.168.0.15'; % Modify for your robot i.e .13 for robot3 .12 for robot2 etc
-client = ['ExampleCdtClient' num2str(int32(rand*1e7))];
+client = ['Timspector'];
 mexmoos('init', 'SERVERHOST', host, 'MOOSNAME', client);
 mexmoos('REGISTER', laser_channel, 0.0);
 mexmoos('REGISTER', stereo_channel, 0.0);

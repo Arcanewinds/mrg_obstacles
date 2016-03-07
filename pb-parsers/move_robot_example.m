@@ -9,9 +9,10 @@ addpath('mrg');
 control_channel = 'husky_plan';
 
 % Initialise mex-moos and register subscribers
+mexmoos('CLOSE');
 clear mexmoos;
-host = '192.168.0.15';
-client = ['ExampleCdtClient' num2str(int32(rand*1e7))];
+host = '192.168.0.14';
+client = ['Timspector'];
 mexmoos('init', 'SERVERHOST', host, 'MOOSNAME', client, 'SERVERPORT','9000');
 pause(1.0); % give mexmoos a chance to connect (important!)
 
