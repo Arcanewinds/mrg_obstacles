@@ -24,7 +24,8 @@ mexmoos('REGISTER', pose_channel, 0.0);
 
 % init
 % x = [0; 0; 0;];
-x = zeros(13,1);
+% x is state [posex, posey, poseth, rangei, bearingi]
+x = zeros(3,1);
 P = 0.0005 * diag([1,1,0.01]);
 
 % Visualisation has x right, y up
@@ -38,21 +39,19 @@ fig4 = figure;
 
 mailbox = mexmoos('FETCH');
 
-% pause
-visual_odom = GetVisualOdometry(mailbox, pose_channel, true);
+
+visual_odom = GetVisualOdometry(mailbox, pose_channel, false);
+size(visual_odom)
+pause
 if ~isempty(visual_odom)
-     previous_x = visual_odom.x;
-     previous_y = visual_odom.y;
-     previous_theta = visual_odom.theta;
+     last_odom = visual_odom;
 else
     pause(1)
     mailbox = mexmoos('FETCH');
     pause(0.2)
-    visual_odom = GetVisualOdometry(mailbox, pose_channel, true);
+    visual_odom = GetVisualOdometry(mailbox, pose_channel, false);
     if ~isempty(visual_odom)
-         previous_x = visual_odom{1}.x;
-         previous_y = visual_odom{1}.y;
-         previous_theta = visual_odom{1}.theta;
+        last_odom = visual_odom;
 
     else
         disp('No visual odometry')
@@ -67,23 +66,18 @@ while true
     % Fetch latest messages from mex-moos
     mailbox = mexmoos('FETCH');
     scan = GetLaserScans(mailbox, laser_channel, true);
-    visual_odom = GetVisualOdometry(mailbox, pose_channel, true);
-
+    visual_odom = GetVisualOdometry(mailbox, pose_channel, false);
+    size(visual_odom)
+    pause
     if ~isempty(scan) && ~isempty(visual_odom)
         disp(['Start loop ', num2str(loop_idx)]);
         % u: x-forward, y-right, theta-clockwise
 
-        u = [visual_odom{1}.x-previous_x; visual_odom{1}.y-previous_y;...
-            visual_odom{1}.theta-previous_theta];
         
         
-        
+        u = compose_poses(visual_odom);
+        vis_odom_pose = tcomp(x(1:3), u);
         % u_history = [u_history; u'];
-
-        previous_x = visual_odom{1}.x;
-        previous_y = visual_odom{1}.y;
-        previous_theta = visual_odom{1}.theta;
-
 
         [xPred, PPred] = SLAMPrediction(u, x, P);
         x = xPred;
@@ -153,7 +147,7 @@ while true
 % 
 %         loop_idx = loop_idx + 1;
     end % end scan not empty
-    x
+%     x
 
 end
 
