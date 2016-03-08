@@ -57,9 +57,10 @@ while true
         ShowLaserScan(scan);
         %key = get(h.fig,'CurrentKey');
         %if key == 's'
+        poles = pole_cluster(scan);
             count1 = count1 + 1;
             if(count1 < 1000)
-            scanLog{count1} = scan;
+                scanLog{count1} = scan;
             end
         %end
     end

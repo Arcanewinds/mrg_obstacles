@@ -1,0 +1,48 @@
+function poles = pole_cluster(scan)
+    I_ref = scan.reflectances(:) > 800;
+    
+    %Calculate Radian-angle for each detection
+    angle_base = 0:1:length(I_ref);
+    angle_true = angle_base(I_ref).';
+    angles = -((angle_true(:) -1)*-scan.step_size - scan.start_angle + 90) * pi/180;
+
+    %Grab Range (m) for each detection
+    ranges = scan.ranges(I_ref);
+        %%%%concatenate all detections
+        %%%%pole_pos = cat(2, angles, ranges);
+
+    num_obs = length(ranges);
+    %initialise 
+    num_c = 1; %number of clusters
+    num_mem = 1; %number of members in current cluster
+    poles = zeros(1,2); %cluster angle/range
+    a_mean = angles(1); %mean angle
+    r_mean = ranges(1); %mean range
+    for m = 2:num_obs
+       %take difference between current and last detection
+       a_diff = abs(angles(m, 1) - angles(m-1, 1));
+       r_diff = abs(ranges(m, 2) - ranges(m-1, 2));  
+       if (a_diff < 0.1 && r_diff < 0.1)
+           %if subsequent detections are close, update mean
+           a_mean = (((a_mean * num_mem) + angles(m, 1))/(num_mem+1));
+           r_mean = (((r_mean * num_mem) + ranges(m, 2))/(num_mem+1));
+           %increment number of members
+           num_mem = num_mem + 1;
+       else
+           %if current detection is not close to previous
+           %save previous mean
+           if(num_c == 1)
+                poles(num_c, 2) = a_mean;
+                poles(num_c, 1) = r_mean;
+           else
+                cat(2, poles, a_mean, r_mean
+               
+           end
+           %initialise new cluster
+           num_mem = 1;
+           num_c = num_c + 1;
+           a_mean = angles(m, 1);
+           r_mean = ranges(m, 2);
+       end
+    end
+end
