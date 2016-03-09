@@ -13,6 +13,10 @@ features = last_state.features';
 x = [last_state.vpose; features(:)];
 P = last_state.covariance;
 
+if(~isempty(polePos) && max(polePos(:,1)) > 10)
+    polePos(polePos(:,1) > 10,:) = [];
+end
+
 visual_odom = GetVisualOdometry(mailbox, channel, false);
 if ~isempty(visual_odom)
     % u: x-forward, y-right, theta-clockwise

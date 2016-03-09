@@ -27,18 +27,18 @@ distDelta  = sqrt((Xplan(planStepCount,1)-xSlam)^2 + (Xplan(planStepCount,2)-ySl
 % distDelta = norm(Xplan(i,:) - [xSlam ySlam]);
 
 
-if abs(thetaDelta) > pi/8
-    sgn = -sign(thetaDelta);% Negative is anticlockwise (Left)
+if abs(thetaDelta) > pi/4
+    sgn = sign(thetaDelta);% Negative is anticlockwise (Left)
     SendSpeedCommand(0.0, sgn * omega, channels.control_channel);
-    pause(0.1); % don't overload moos w/commands
+%     pause(0.1); % don't overload moos w/commands
     
     
     %% Drive straight
     % Drive until Slam position = path position
     
-elseif distDelta > 0.2
+elseif distDelta > 0.5
         SendSpeedCommand(velocity, 0.0, channels.control_channel)
-        pause(0.1);
+%         pause(0.1);
 else
     newStepCount = planStepCount+1;
     SendSpeedCommand(0, 0, channels.control_channel)
