@@ -34,6 +34,15 @@ lastSlam.vpos = [0 0 0]';
 lastSlam.features = [];
 lastSlam.cov = 0.0005 * diag([1,1,0.01]);
 
+% status:
+%   1: explore forward
+%   2: go to target
+%   3: got to 0,0
+%   4: park
+%   0: EMERGENCY, TODO
+status = 1;
+x_ellipse = [];
+
 while true
     % Subscribe to channels in one place and pass handles
     % laser_channel = 'LMS1xx_14320092_laser2d'; % Modify for your robot
@@ -76,12 +85,18 @@ while true
     
     scan           = GetLaserScans(mailbox, channels.laser_channel, true);
     polePos        = pole_cluster(scan);
+%     x_ellipse = target_detector(stereo);
     [obstacle_ranges, obstacle_angles] = thresh_detect(scan,obsThresh);
     obstacles = [obstacle_ranges obstacle_angles];
     curSlam        = slam(polePos, mailbox, channels.pose_channel, lastSlam);
     
+    status = update_status(status,curSlam,x_ellipse);
+    if status == 5
+        break
+    end
+    
     if flags.needPlan == 1
-        Xplan = planner(curSlam,obstacles);
+        Xplan = planner(curSlam,obstacles,status,x_ellipse);
     end
     
     [i, flags] = controller2(channels,Xplan,curSlam,velocity,omega,i,flags);
