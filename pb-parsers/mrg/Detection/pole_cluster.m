@@ -1,5 +1,5 @@
 function poles = pole_cluster(scan)
-    [ranges, angles] = thresh_detect(scan, 800);
+    [ranges, angles] = thresh_detect(scan, 1050);
     num_obs = length(ranges);
     if(num_obs > 0)
     %initialise 
