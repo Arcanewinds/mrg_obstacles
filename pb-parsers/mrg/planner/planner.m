@@ -1,10 +1,9 @@
-function plan = planner(curSlam, obstacles_in, old_plan, status, x_ellipse)
-
+function plan = planner(curSlam, obstacles_in, old_plan, planStepCount, status, x_ellipse)
 obstacle_radius = 0.6;
 plotting = false;
 n_rand_points = 1000;
 
-x_vehicle = curSlam.vpos;
+x_vehicle = curSlam.vpose;
 
 switch status
     case 1
@@ -33,7 +32,7 @@ if ~isempty(old_plan)
     if old_plan(end,:) ~= x_target
         old_plan_good = false;
     end
-    for i=1:size(old_plan,1)
+    for i=planStepCount:size(old_plan,1)
         for j=1:n_obstacles
             if norm(old_plan(i,:) - x_obstacles(j,:)) < obstacle_radius
                 old_plan_good = false;
@@ -41,7 +40,8 @@ if ~isempty(old_plan)
         end
     end
     if old_plan_good
-        return
+        plan = old_plan(planStepCount:end,:);
+        return;
     end
 end
 
@@ -98,7 +98,6 @@ edge_costs = edge_costs + edge_costs';
 [cost, route_ids] = dijkstra(edge_costs,1,n_points);
 
 route = x_points(route_ids,:);
-% plot(route(:,1),route(:,2),'k','linewidth',3);
 sx = smooth(route(:,1),3);
 sy = smooth(route(:,2),3);
 

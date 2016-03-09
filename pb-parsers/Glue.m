@@ -19,22 +19,31 @@ clear mexmoos
 host = '192.168.0.14'; % Modify for your robot
 client = 'Team';
 mexmoos('init', 'SERVERHOST', host, 'MOOSNAME', client);
-mexmoos('REGISTER', channels.laser_channel, 0.0);
-mexmoos('REGISTER', channels.stereo_channel, 0.0);
+mexmoos('REGISTER', channels.laser_channel, 0.1);
+mexmoos('REGISTER', channels.stereo_channel, 0.5);
 mexmoos('REGISTER', channels.pose_channel, 0.0);
+
 pause(0.1); % Give mexmoos a chance to connect (important!)
 %% Parameters
 velocity = 0.3;
 omega = 0.3;
 planLength = 3;
-obsThresh = 650;
+obsThresh = 700;
 
 %Initialise
-lastSlam.vpos = [0 0 0]';
+lastSlam.vpose = [0 0 0]';
 lastSlam.features = [];
-lastSlam.cov = 0.0005 * diag([1,1,0.01]);
+lastSlam.covariance = 0.0005 * diag([1,1,0.01]);
 
+lastScan = [];
+
+flags = struct;
+flags.needPlan = 1;
+plan = [];
 oldPlan = [];
+polePos = [];
+
+planStepCount = 1;
 % status:
 %   1: explore forward
 %   2: go to target
@@ -44,65 +53,46 @@ oldPlan = [];
 %   0: EMERGENCY, TODO
 status = 1;
 x_ellipse = [];
-
+counter = 0;
 while true
-    % Subscribe to channels in one place and pass handles
-    % laser_channel = 'LMS1xx_14320092_laser2d'; % Modify for your robot
-    % stereo_channel = 'BUMBLEBEE2_IMAGES';
-    % pose_channel = 'BB2-14366960_pose_pb';
-    % control_channel  = 'husky_plan';
-    
-%     DEFUNCT DOCUMENTATION
-    %% Call Tims stuff
-    % Subscribe to laser_channel, stereo_channel
-    % Outputs: pole position angle and distance [range angle; range angle]
-    %           target [range, angle]
-    
-    
-    %% Call Kevin's stuff
-    % Inputs: [range, angle; range angle...]
-    %           subscribe channels: pose_channel
-    % Outputs: State vector [x y theta range angle range angle ... ]'
-    
-    %% Call gregs planner
-    % Inputs: obstacle [angle, range; ...] Tim ?
-    %           pole [angle, range] from Kevin
-    %           position in [x;y;theta;range;angle;range;angle...] Kevin
-    % Outputs: Global x, y locations for plan [x y; x y; ...]
-    
-    %% Call Adam's Controller
-    % Inputs: Global Robot from Slam [x y theta]'
-    %         Global Path from Planner [x,y; x,y ... ]
-    % Subscribe to control_channel
-    
-    % Output: vehicle movement
-    
-    %% Flag struct
-    % flags.needPlan => need to make a new plan
-    
+    tic
     mailbox = mexmoos('FETCH');
-      
-    %% Implement Pole Detection -> SLAM -> Planner (If required) -> Controller
     
-    scan           = GetLaserScans(mailbox, channels.laser_channel, true);
-    polePos        = pole_cluster(scan);
+    scan = GetLaserScans(mailbox, channels.laser_channel, true);
+    if ~isempty(scan)
+        lastScan = scan;
+        disp(['Scan received ' num2str(counter)]);
+        ShowLaserScan(scan);
+        drawnow;
+        polePos = pole_cluster(scan);
+%     else
+%         pause(0.1);
+    end
+    pause(0.1)
 %     x_ellipse = target_detector(stereo);
-    curSlam        = slam(polePos, mailbox, channels.pose_channel, lastSlam);
-    lastSlam       = curSlam;
+    curSlam = slam(polePos, mailbox, channels.pose_channel, lastSlam);
+    lastSlam = curSlam;
     
     status = update_status(status,curSlam,x_ellipse);
     if status == 5
         break
     end
     
-    if flags.needPlan == 1
-        [obstacle_ranges, obstacle_angles] = thresh_detect(scan,obsThresh);
+    if flags.needPlan == 1 && ~isempty(lastScan)
+        [obstacle_ranges, obstacle_angles] = thresh_detect(lastScan,obsThresh);
         obstacles = [obstacle_ranges obstacle_angles];
-        plan = planner(curSlam,obstacles,oldPlan,status,x_ellipse);
+        plan = planner(curSlam,obstacles,oldPlan,planStepCount,status,x_ellipse);
         oldPlan = plan;
+        planStepCount = 1;
         flags.needPlan = 0;
+        disp('Plan updated');
     end
     
-    [i, flags] = controller2(channels,plan,curSlam,velocity,omega,i,flags);
+    if ~isempty(plan)
+        [planStepCount, flags] = controller2(channels,plan,curSlam,velocity,omega,planStepCount,flags);
+    end
+    counter = counter + 1;
+    disp(toc);
+
 end
     

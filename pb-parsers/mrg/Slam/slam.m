@@ -37,7 +37,7 @@ if ~isempty(visual_odom)
     end
     [x, P, new_feature] = SLAMMeasurement(z, x, P);
 else
-    disp('No Visual Odometry. Cannot SLAM');
+%     disp('No Visual Odometry. Cannot SLAM');
     new_feature = false;
 end
 
