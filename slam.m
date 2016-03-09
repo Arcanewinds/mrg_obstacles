@@ -38,7 +38,7 @@ end
 
 xstate = struct;
 xstate.vpose = x(1:3);
-xstate.features = [x(1:2:end)',x(2:2:end)'];
+xstate.features = [x(4:2:end)',x(5:2:end)'];
 xstate.covariance = P;
 
 end
