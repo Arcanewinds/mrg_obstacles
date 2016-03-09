@@ -1,0 +1,62 @@
+%% ControllerFunction
+% Inputs: channel structure
+%         Xplan = planlength x 2
+%         curSlam = structure: .vpos = [x y theta]' , 
+%                              .features = [range_i, bearing_i]' 
+%                              .covariance = N+3 X N+3 
+%
+%
+%
+%
+%
+
+function lastxyTheta = controller(channels,Xplan,curSlam,velocity,omega)
+    xSlam = curSlam.vpos(1); ySlam = curSlam.vpos(2);
+    lastSlam = curSlam;
+    for i = 2:numCommands
+        mailbox = mexmoos('FETCH');
+        
+        
+        %% ROTATE
+        % Rotate until Slam angle = path angle
+        thetaDelta = 10;
+        thetaDesired = atan((Xplan(i,2)-ySlam)/(Xplan(i,1)-xSlam));
+        while thetaDelta < pi/8
+            mailbox = mexmoos('FETCH');
+            thetaDelta = thetaDesired - thetaSlam;
+            sgn = -sign(thetaDelta);% Negative is anticlockwise (Left)
+            SendSpeedCommand(0.0, sgn * omega, control_channel);
+            pause(0.1); % don't overload moos w/commands
+            
+            %% Update theta from SLAM
+            polePos = poleDetection(channels.laser_channel, channels.stereo_channel);
+            curSlam   = slam(polePos, mailbox, channels.pose_channel, lastSlam);
+            lastSlam = curSlam;
+            xSlam = curSlam.vpos(1); ySlam = curSlam.vpos(2);
+            thetaSlam = curSlam.vpos(3);
+            
+            thetaDesired = atan((Xplan(i,2)-ySlam)/(Xplan(i,1)-xSlam));
+            thetaDelta = abs(thetaDesired-thetaSlam);
+        end
+        
+        %% Drive straight
+        % Drive until Slam position = path position
+        distDelta = 10;
+        while distDelta < 0.2
+            SendSpeedCommand(velocity, 0.0, channels.control_channel);
+            
+            mailbox = mexmoos('FETCH');
+            %% Update theta from SLAM
+            polePos = poleDetection(channels.laser_channel, channels.stereo_channel);
+            curSlam   = slam(polePos, mailbox, channels.pose_channel, lastSlam);
+            lastSlam = curSlam;
+            
+            xSlam = curSlam.vpos(1); ySlam = curSlam.vpos(2);
+            distDelta  = sqrt((X(i,1)-xSlam)^2 + (X(i,2)-ySlam)^2);
+            pause(0.1);
+        end
+        
+    end
+    
+    SendSpeedCommand(0, 0, channels.control_channel)
+    lastxyTheta = lastSlam;
