@@ -13,17 +13,17 @@
 %          Robot controls
 
 function [k, flags] = controller2(channels,Xplan,curSlam,velocity,omega,i,inflags)
-planLength = 10;
+planLength = 3;
 flags = inflags;
 
-xSlam = curSlam.vpos(1); ySlam = curSlam.vpos(2);
+xSlam = curSlam.vpos(1); ySlam = curSlam.vpos(2); thetaSlam = curSlam.vpos(3);
 
 %% ROTATE
 % Rotate until Slam angle = path angle
 thetaDesired = atan((Xplan(i,2)-ySlam)/(Xplan(i,1)-xSlam));
 thetaDelta = thetaDesired-thetaSlam;
-xSlam = curSlam.vpos(1); ySlam = curSlam.vpos(2);
-distDelta  = sqrt((X(i,1)-xSlam)^2 + (X(i,2)-ySlam)^2);
+distDelta  = sqrt((Xplan(i,1)-xSlam)^2 + (Xplan(i,2)-ySlam)^2);
+% distDelta = norm(Xplan(i,:) - [xSlam ySlam]);
 
 
 if abs(thetaDelta) > pi/8
@@ -35,16 +35,15 @@ if abs(thetaDelta) > pi/8
     %% Drive straight
     % Drive until Slam position = path position
     
-else if distDelta > 0.2
+elseif distDelta > 0.2
         SendSpeedCommand(velocity, 0.0, channels.control_channel)
         pause(0.1);
-        
-    else
-        k = i+1;
-        SendSpeedCommand(0, 0, channels.control_channel)
-        if k >= planLength
-            flags.needPlan = 1;
-        end
+else
+    k = i+1;
+    SendSpeedCommand(0, 0, channels.control_channel)
+    if k >= planLength
+        flags.needPlan = 1;
     end
+end
 
 end

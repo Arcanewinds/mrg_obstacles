@@ -1,7 +1,7 @@
-function plan = planner_function(curSlam, obstacles_in, old_plan, status, x_ellipse)
+function plan = planner(curSlam, obstacles_in, old_plan, status, x_ellipse)
 
-obstacle_radius = 0.5;
-plotting = true;
+obstacle_radius = 0.6;
+plotting = false;
 n_rand_points = 1000;
 
 x_vehicle = curSlam.vpos;
@@ -62,7 +62,7 @@ end
 
 % check if plan complete
 if norm(x_vehicle(1:2)' - x_target) < 0.2
-    plan = x_vehicle(1:2)';
+    plan = x_target;
     return
 end
 
@@ -116,5 +116,5 @@ if plotting
     hold off
 end
 
-plan = [sx sy];
+plan = flip([sx sy],1);
 end

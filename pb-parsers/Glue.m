@@ -34,11 +34,13 @@ lastSlam.vpos = [0 0 0]';
 lastSlam.features = [];
 lastSlam.cov = 0.0005 * diag([1,1,0.01]);
 
+oldPlan = [];
 % status:
 %   1: explore forward
 %   2: go to target
-%   3: got to 0,0
+%   3: go to -0.5,0
 %   4: park
+%   5: terminal
 %   0: EMERGENCY, TODO
 status = 1;
 x_ellipse = [];
@@ -50,7 +52,7 @@ while true
     % pose_channel = 'BB2-14366960_pose_pb';
     % control_channel  = 'husky_plan';
     
-    
+%     DEFUNCT DOCUMENTATION
     %% Call Tims stuff
     % Subscribe to laser_channel, stereo_channel
     % Outputs: pole position angle and distance [range angle; range angle]
@@ -78,7 +80,6 @@ while true
     %% Flag struct
     % flags.needPlan => need to make a new plan
     
-    
     mailbox = mexmoos('FETCH');
       
     %% Implement Pole Detection -> SLAM -> Planner (If required) -> Controller
@@ -86,9 +87,8 @@ while true
     scan           = GetLaserScans(mailbox, channels.laser_channel, true);
     polePos        = pole_cluster(scan);
 %     x_ellipse = target_detector(stereo);
-    [obstacle_ranges, obstacle_angles] = thresh_detect(scan,obsThresh);
-    obstacles = [obstacle_ranges obstacle_angles];
     curSlam        = slam(polePos, mailbox, channels.pose_channel, lastSlam);
+    lastSlam       = curSlam;
     
     status = update_status(status,curSlam,x_ellipse);
     if status == 5
@@ -96,9 +96,13 @@ while true
     end
     
     if flags.needPlan == 1
-        Xplan = planner(curSlam,obstacles,status,x_ellipse);
+        [obstacle_ranges, obstacle_angles] = thresh_detect(scan,obsThresh);
+        obstacles = [obstacle_ranges obstacle_angles];
+        plan = planner(curSlam,obstacles,oldPlan,status,x_ellipse);
+        oldPlan = plan;
+        flags.needPlan = 0;
     end
     
-    [i, flags] = controller2(channels,Xplan,curSlam,velocity,omega,i,flags);
+    [i, flags] = controller2(channels,plan,curSlam,velocity,omega,i,flags);
 end
     
