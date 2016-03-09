@@ -1,4 +1,4 @@
-function [ xstate ] = slam(polePos, mailbox, channel, last_state)
+function [ xstate, new_feature ] = slam(polePos, mailbox, channel, last_state)
 
 %%
 % xstate = struct
@@ -9,7 +9,8 @@ function [ xstate ] = slam(polePos, mailbox, channel, last_state)
 % init
 % x = [0; 0; 0;];
 % x is state [posex, posey, poseth, rangei, bearingi]
-x = [last_state.vpose; last_state.features(:)];
+features = last_state.features';
+x = [last_state.vpose; features(:)];
 P = last_state.covariance;
 
 visual_odom = GetVisualOdometry(mailbox, channel, false);
@@ -25,21 +26,26 @@ if ~isempty(visual_odom)
     P = PPred;
 
     % find poles
-    pole_polar = polePos;
+%     pole_polar = polePos;
 %     [5-loop_idx, 0; loop_idx, pi];
 
     % do data associations
-    z = SLAMDataAssociations(x, pole_polar);
-
-    [x, P] = SLAMMeasurement(z, x, P);
+    if(~isempty(polePos))
+        z = SLAMDataAssociations(x, polePos);
+    else
+        z = [];
+    end
+    [x, P, new_feature] = SLAMMeasurement(z, x, P);
 else
     disp('No Visual Odometry. Cannot SLAM');
+    new_feature = false;
 end
 
 xstate = struct;
 xstate.vpose = x(1:3);
-xstate.features = [x(1:2:end)',x(2:2:end)'];
+xstate.features = [x(4:2:end),x(5:2:end)];
 xstate.covariance = P;
+
 
 end
 

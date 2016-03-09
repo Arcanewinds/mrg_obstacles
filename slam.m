@@ -1,4 +1,4 @@
-function [ xstate ] = slam(polePos, mailbox, channel, last_state)
+function [ xstate, new_feature ] = slam(polePos, mailbox, channel, last_state)
 
 %%
 % xstate = struct
@@ -35,15 +35,17 @@ if ~isempty(visual_odom)
     else
         z = [];
     end
-    [x, P] = SLAMMeasurement(z, x, P);
+    [x, P, new_feature] = SLAMMeasurement(z, x, P);
 else
     disp('No Visual Odometry. Cannot SLAM');
+    new_feature = false;
 end
 
 xstate = struct;
 xstate.vpose = x(1:3);
 xstate.features = [x(4:2:end),x(5:2:end)];
 xstate.covariance = P;
+
 
 end
 

@@ -1,4 +1,4 @@
-function [xEst, PEst] = SLAMMeasurement(z, x, P)
+function [xEst, PEst, new_feature] = SLAMMeasurement(z, x, P)
   %%
   % SLAMMeasurement
   %
@@ -13,6 +13,7 @@ function [xEst, PEst] = SLAMMeasurement(z, x, P)
 
   REst = 0.25 * diag([1.1, 5 * pi/180.0]).^0.2;
   xEst = x;
+  new_feature = false;
   
   for i = 1:size(z,1)
     FeatureIndex = GetFeatureIndex(z(i,3));
@@ -42,6 +43,7 @@ function [xEst, PEst] = SLAMMeasurement(z, x, P)
 
     else
       disp('Adding new landmark');
+      new_feature = true;
       nStates = length(xEst);
       xFeature = xVehicle(1:2) + ...
           [z(i, 1) * cos(z(i, 2) + xVehicle(3)); z(i, 1) * sin(z(i, 2) + xVehicle(3))];
