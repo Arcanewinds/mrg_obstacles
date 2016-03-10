@@ -118,7 +118,7 @@ sx = smooth(route(:,1),3);
 sy = smooth(route(:,2),3);
 
 if plotting
-    figure(10);
+    figure(2);
     scatter(x_obstacles(:,1),x_obstacles(:,2),'rx');
     set(gca,'Ydir','reverse');
     hold on;

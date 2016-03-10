@@ -21,13 +21,20 @@ xSlam = curSlam.vpose(1); ySlam = curSlam.vpose(2); thetaSlam = curSlam.vpose(3)
 
 %% ROTATE
 % Rotate until Slam angle = path angle
+% Work out whether to go in the [-pi/2 pi/2] for positive or the rest of
+forward = sign(dot(Xplan(planStepCount,:)',[xSlam ySlam]'));
 thetaDesired = atan((Xplan(planStepCount,2)-ySlam)/(Xplan(planStepCount,1)-xSlam));
+if forward == -1 
+    if sign(thetaDesired) == -1
+    thetaDesired = thetaDesired + pi;
+    else thetaDesired = thetaDesired - pi;
+    end
+end
 thetaDelta = thetaDesired-thetaSlam;
 distDelta  = sqrt((Xplan(planStepCount,1)-xSlam)^2 + (Xplan(planStepCount,2)-ySlam)^2);
 % distDelta = norm(Xplan(i,:) - [xSlam ySlam]);
-
-
-if abs(thetaDelta) > pi/4
+ 
+if abs(thetaDelta) > pi/4 && distDelta > 0.3
     sgn = sign(thetaDelta);% Negative is anticlockwise (Left)
     SendSpeedCommand(0.0, sgn * omega, channels.control_channel);
 %     pause(0.1); % don't overload moos w/commands
@@ -36,7 +43,7 @@ if abs(thetaDelta) > pi/4
     %% Drive straight
     % Drive until Slam position = path position
     
-elseif distDelta > 0.5
+elseif distDelta > 0.3
         SendSpeedCommand(velocity, 0.0, channels.control_channel)
 %         pause(0.1);
 else

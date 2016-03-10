@@ -1,4 +1,4 @@
-addpath(genpath('./pb-parsers/'));
+addpath(genpath('../../'));
 % addpath('./pb-parsers/mrg');
 % addpath('../PoleDetector');
 % addpath(genpath('./ekfslammatlabcdt/'));
@@ -50,7 +50,6 @@ for i=1:length(poseData)
 end
 triangle = [1,0,1; -.25,.25,1; -.25,-.25,1]';
 states = [last_state];
-old_plan = [];
 for i=1:step:length(poseData)-step
 %     j = 1;
 %     for k=j:length(scanData)
@@ -61,15 +60,9 @@ for i=1:step:length(poseData)-step
 %         end
 %     end
 %     j = k    
-    
-    scan = scanData{ceil(i/(length(poseData)/length(scanData))),1};
-    [obstacle_ranges, obstacle_angles] = thresh_detect(scan,600);
-    obstacles = [obstacle_ranges obstacle_angles];
-    plan = planner(last_state, obstacles, old_plan, 1, 1, []);
-    old_plan = plan;
-    
-    figure(1);
+    figure(1)
     subplot(1,2,1)
+    scan = scanData{ceil(i/(length(poseData)/length(scanData))),1};
     poles = pole_cluster(scan);
     if(~isempty(poles) && max(poles(:,1)) > 10)
         poles(poles(:,1) > 10,:) = [];
@@ -78,14 +71,13 @@ for i=1:step:length(poseData)-step
     if(~isempty(poles))
         viscircles([poles(:,1).*cos(poles(:,2)) poles(:,1).*sin(poles(:,2))], ones(size(poles,1),1)*0.2);
     end
-    
+%     poles = pole_cluster(scan,1});
     last_state = slam_nofeed(poles, poses(i:i+step), last_state);
     states = [states, last_state];
-
+%     last_state.vpose(3)
     se2 = BuildSE2Transform(last_state.vpose); 
-    figure(1);
+    figure(1)
     subplot(1,2,2)
-    clf;
     axis(axes)
     axis equal
     whitebg(gcf,'black');
@@ -93,11 +85,6 @@ for i=1:step:length(poseData)-step
     hold on
     trans_tri = se2*triangle;
     fill(trans_tri(1,:), -trans_tri(2,:), 'w');
-    hold off
-    
-%     viscircles([obstacles(:,1) obstacles(:,2)], ones(size(obstacles,1),1)*0.5);
-%     plot(plan(:,1),plan(:,2),'g','linewidth',3);
-    
 %     plot(last_state.vpose(1),last_state.vpose(2),'bx');
 %     scatter(last_state.features(:,1), -last_state.features(:,2),'g.');
 %     if(~isempty(poles))
