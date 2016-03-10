@@ -1,4 +1,4 @@
-function plan = planner2(curSlam, obstacles_in, old_plan, planStepCount, status, x_ellipse)
+function [plan, badStart] = planner2(curSlam, obstacles_in, old_plan, planStepCount, status, x_ellipse)
 obstacle_radius = 0.4;
 plotting = false;
 % n_rand_points = 1000;
@@ -97,10 +97,10 @@ x_points = [x_vehicle(1:2)'; x_points; x_target];
 n_points = size(x_points,1);
 
 % check if starting in obstacle TODO DO SOMETHING IF I AM!!
-bad_start = 0;
+badStart = 0;
 for i=1:n_obstacles
     if norm(x_vehicle(1:2)' - x_obstacles(i,:)) < obstacle_radius
-        bad_start = 1;
+        badStart = 1;
         disp('DISASTER');
     end
 end
