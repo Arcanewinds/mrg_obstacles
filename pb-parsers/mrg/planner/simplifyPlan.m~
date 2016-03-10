@@ -1,0 +1,30 @@
+function simple_plan = simplifyPlan(plan,x_obstacles,obstacle_radius)
+simple_plan = plan(1,:);
+for i = 3:size(plan,1)
+    good_point = true;
+    seg = [simple_plan(end,:) plan(i,:)];
+    for j = 1:size(x_obstacles,1)
+        intersect_pts = intersectLineCircle(seg, ...
+                                      [x_obstacles(j,:) obstacle_radius]);
+        if ~isnan(intersect_pts(1)) && in_segment(intersect_pts,seg)
+            good_point = false;
+            simple_plan = [simple_plan; plan(i-1,:)];
+            break;
+        end
+    end
+end
+simple_plan = [simple_plan; plan(end,:)];
+spaced_plan = simple_plan(1,:);
+for i=2:size(simple_plan,1)
+    seg_length = norm(simple_plan(i,:) - simple_plan(i-1,:));
+    if seg_length > 0.5
+        n_split = floor(seg_length/0.5);
+        xs = linspace(simple_plan(i-1,1),simple_plan(i,1),n_split);
+        ys = linspace(simple_plan(i-1,2),simple_plan(i,2),n_split);
+        spaced_plan = [spaced_plan; xs' ys'];
+    else
+        spaced_plan = [spaced_plan; simple_plan(i,:)];
+    end
+end
+spaced_plan
+end
