@@ -110,7 +110,7 @@ while true
     if flags.needPlan == 1 && ~isempty(lastScan)
         [obstacle_ranges, obstacle_angles] = thresh_detect(lastScan,obsThresh);
         obstacles = [obstacle_ranges obstacle_angles];
-        plan = planner(curSlam,obstacles,oldPlan,planStepCount,status,x_ellipse);
+        [plan, flags.badStart] = planner(curSlam,obstacles,oldPlan,planStepCount,status,x_ellipse);
         oldPlan = plan;
         planStepCount = 1;
         flags.needPlan = 0;
