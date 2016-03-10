@@ -60,39 +60,56 @@ for i=1:step:length(poseData)-step
 %             break
 %         end
 %     end
-%     j = k    
+%     j = k
     
     scan = scanData{ceil(i/(length(poseData)/length(scanData))),1};
     [obstacle_ranges, obstacle_angles] = thresh_detect(scan,600);
     obstacles = [obstacle_ranges obstacle_angles];
-    plan = planner(last_state, obstacles, old_plan, 1, 1, []);
+    plan = planner2(last_state, obstacles, old_plan, 1, 1, []);
+    
+    n_obstacles = size(obstacles,1);
+    theta_obstacles = obstacles(:,2) + ones(n_obstacles,1)*x_vehicle(3);
+    x_obstacles = ones(n_obstacles,1)*x_vehicle(1) + obstacles(:,1).*cos(theta_obstacles);
+    y_obstacles = ones(n_obstacles,1)*x_vehicle(2) + obstacles(:,1).*sin(theta_obstacles);
+    x_obstacles = [x_obstacles y_obstacles];
+    
+    figure(10);
+    clf;
+    hold on;
+    scatter(x_obstacles(:,1),x_obstacles(:,2),'ro');
+    scatter(last_state.vpose(1),last_state.vpose(2),'k+','linewidth',3);
+    scatter(plan(:,1),plan(:,2),'gx','linewidth',3);
+    axis equal
+    axis tight
+    hold off;
+    axis([-1 15 -7.5 7.5]);
+    drawnow;
+
     old_plan = plan;
     
-    figure(1);
-    subplot(1,2,1)
+    
     poles = pole_cluster(scan);
     if(~isempty(poles) && max(poles(:,1)) > 10)
         poles(poles(:,1) > 10,:) = [];
     end
-    ShowLaserScan(scan);
-    if(~isempty(poles))
-        viscircles([poles(:,1).*cos(poles(:,2)) poles(:,1).*sin(poles(:,2))], ones(size(poles,1),1)*0.2);
-    end
+%     if(~isempty(poles))
+%         viscircles([poles(:,1).*cos(poles(:,2)) poles(:,1).*sin(poles(:,2))], ones(size(poles,1),1)*0.2);
+%     end
     
     last_state = slam_nofeed(poles, poses(i:i+step), last_state);
     states = [states, last_state];
 
     se2 = BuildSE2Transform(last_state.vpose); 
-    figure(1);
-    subplot(1,2,2)
-    clf;
-    axis(axes)
-    axis equal
-    whitebg(gcf,'black');
+%     figure(1);
+%     subplot(1,2,2)
+%     clf;
+%     axis(axes)
+%     axis equal
+%     whitebg(gcf,'black');
 
-    hold on
+%     hold on
     trans_tri = se2*triangle;
-    fill(trans_tri(1,:), -trans_tri(2,:), 'w');
+%     fill(trans_tri(1,:), -trans_tri(2,:), 'w');
     
 %     viscircles([obstacles(:,1) obstacles(:,2)], ones(size(obstacles,1),1)*0.5);
 %     plot(plan(:,1),plan(:,2),'g','linewidth',3);
@@ -102,10 +119,17 @@ for i=1:step:length(poseData)-step
 %     if(~isempty(poles))
 %         scatter(poles(:,1).*sin(poles(:,2)), poles(:,1).*cos(poles(:,2)),'go');
 %     end
-    drawnow
-    pause(.1)
+%     drawnow
+%     figure(10);
+%     hold on
+%     scatter(last_state.features(:,1), last_state.features(:,2),'ko','linewidth',3);
+%     hold off;
+%     drawnow();
+%     axis([-1 15 -7.5 7.5]);
+
+%     pause(.3)
 end
-    scatter(last_state.features(:,1), -last_state.features(:,2),'ro');
+%      scatter(last_state.features(:,1), -last_state.features(:,2),'ro');
 
 % Xg = zeros(length(states),1);
 % Yg = zeros(length(states),1);
