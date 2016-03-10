@@ -1,7 +1,7 @@
 addpath(genpath('./pb-parsers/'));
-addpath('./pb-parsers/mrg');
+% addpath('./pb-parsers/mrg');
 % addpath('../PoleDetector');
-addpath(genpath('./ekfslammatlabcdt/'));
+% addpath(genpath('./ekfslammatlabcdt/'));
 close all
 
 scan_id = 3;
@@ -85,6 +85,7 @@ for i=1:step:length(poseData)-step
     hold on
     trans_tri = se2*triangle;
     fill(trans_tri(1,:), -trans_tri(2,:), 'w');
+    hold off
 %     plot(last_state.vpose(1),last_state.vpose(2),'bx');
 %     scatter(last_state.features(:,1), -last_state.features(:,2),'g.');
 %     if(~isempty(poles))
