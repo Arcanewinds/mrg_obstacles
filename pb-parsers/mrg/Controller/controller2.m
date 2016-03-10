@@ -46,6 +46,7 @@ else
 
     if abs(thetaDelta) > pi/6 && distDelta > 0.3
         sgn = sign(thetaDelta);% Negative is anticlockwise (Left)
+        omega = min(0.5 * abs(thetaDelta),0.49);
         SendSpeedCommand(0.0, sgn * omega, channels.control_channel);
         %     pause(0.1); % don't overload moos w/commands
 
@@ -54,12 +55,13 @@ else
         % Drive until Slam position = path position
 
     elseif distDelta > 0.3
+        velocity = min(0.49,distDelta);
         SendSpeedCommand(velocity, 0.0, channels.control_channel)
         %         pause(0.1);
     else
         newStepCount = planStepCount+1;
         SendSpeedCommand(0, 0, channels.control_channel)
-        if newStepCount >= planLength
+        if newStepCount >= planLength || newStepCount > size(Xplan,1)
             flags.needPlan = 1;
         end
     end
