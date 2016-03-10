@@ -21,7 +21,7 @@ for i=2:size(clean_plan,1)
         n_split = ceil(seg_length/0.5);
         xs = linspace(clean_plan(i-1,1),clean_plan(i,1),n_split);
         ys = linspace(clean_plan(i-1,2),clean_plan(i,2),n_split);
-        simple_plan = [simple_plan; xs' ys'];
+        simple_plan = [simple_plan; xs(2:end)' ys(2:end)'];
     else
         simple_plan = [simple_plan; clean_plan(i,:)];
     end

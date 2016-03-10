@@ -117,15 +117,21 @@ while true
         figure(1)
         subplot(1,2,2)
         axis equal
+        hold on
         plot(plan(:,1),-plan(:,2),'g-')
+        hold off
         disp('Plan updated');
         count5 = count5 + 1;
-        planLog{count5} = plan;
+        lplan = struct;
+        lplan.plan = plan;
+        lplan.timestamp = lastScan.timestamp;
+        planLog{count5} = lplan;
     end
-    
+%     a = [flags.needPlan, planStepCount]
     if ~isempty(plan)
         [planStepCount, flags] = controller2(channels,plan,curSlam,velocity,omega,planStepCount,flags);
     end
+%     b = [flags.needPlan, planStepCount]
     counter = counter + 1;
     % Display laser scan
     if (~isempty(scan))

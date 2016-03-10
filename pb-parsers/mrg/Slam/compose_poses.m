@@ -1,7 +1,7 @@
 function [ u ] = compose_poses( poses )
 %     transform = tcomp([poses{end - 1}.x, poses{end - 1}.y, poses{end - 1}.theta],...
 %         [poses{end}.x, poses{end}.y, poses{end}.theta]);
-    if(size(poses,1) == 1)
+    if(size(poses,2) == 1)
         transform = [poses{1}.x; poses{1}.y; poses{1}.theta]; 
     else
         transform = tcomp([poses{1}.x, poses{1}.y, poses{1}.theta]',...

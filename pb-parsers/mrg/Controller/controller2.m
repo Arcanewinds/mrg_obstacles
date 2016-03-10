@@ -34,7 +34,7 @@ thetaDelta = thetaDesired-thetaSlam;
 distDelta  = sqrt((Xplan(planStepCount,1)-xSlam)^2 + (Xplan(planStepCount,2)-ySlam)^2);
 % distDelta = norm(Xplan(i,:) - [xSlam ySlam]);
  
-if abs(thetaDelta) > pi/4 && distDelta > 0.3
+if abs(thetaDelta) > pi/6 && distDelta > 0.3
     sgn = sign(thetaDelta);% Negative is anticlockwise (Left)
     SendSpeedCommand(0.0, sgn * omega, channels.control_channel);
 %     pause(0.1); % don't overload moos w/commands

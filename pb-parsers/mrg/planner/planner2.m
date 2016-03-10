@@ -1,5 +1,5 @@
 function plan = planner2(curSlam, obstacles_in, old_plan, planStepCount, status, x_ellipse)
-obstacle_radius = 0.4;
+obstacle_radius = 0.2;
 plotting = false;
 % n_rand_points = 1000;
 
@@ -7,7 +7,7 @@ x_vehicle = curSlam.vpose;
 
 switch status
     case 1
-        x_target = [12 0];
+        x_target = [8 0];
     case 2
         x_target = [x_vehicle(1) + x_ellipse(1)*cos(x_ellipse(2) + x_vehicle(3)), ...
                     x_vehicle(2) + x_ellipse(1)*sin(x_ellipse(2) + x_vehicle(3))];
@@ -57,7 +57,7 @@ if ~isempty(old_plan) && trying_old_plans
     end
     
     if old_plan_good
-        plan = [x_vehicle(1:2)'; old_plan(planStepCount:end,:)];
+        plan = [x_vehicle(1:2)'; old_plan(planStepCount+1:end,:)];
         if plotting
             figure(10);
             scatter(x_obstacles(:,1),x_obstacles(:,2),'rx');
