@@ -38,7 +38,7 @@ pause(0.1); % Give mexmoos a chance to connect (important!)
 %% Parameters
 velocity = 0.3;
 omega = 0.3;
-planLength = 3;
+planLength = 6;
 obsThresh = 700;
 
 %Initialise
@@ -55,7 +55,7 @@ plan = [];
 oldPlan = [];
 polePos = [];
 
-planStepCount = 1;
+planStepCount = 2;
 % status:
 %   1: explore forward
 %   2: go to target
@@ -63,7 +63,7 @@ planStepCount = 1;
 %   4: park
 %   5: terminal
 %   0: EMERGENCY, TODO
-status = 1;
+flags.status = 1;
 x_ellipse = [];
 counter = 0;
 while true
@@ -96,23 +96,32 @@ while true
     subplot(1,2,2)
 %     disp([curSlam.vpose(1), curSlam.vpose(2)])
     hold on
-    plot(curSlam.vpose(1), curSlam.vpose(2),'rx');
+    plot(curSlam.vpose(1), -curSlam.vpose(2),'rx');
     scatter(curSlam.features(:,1),-curSlam.features(:,2),'wo');
     axis([-10,10,-10,10])
     hold off
 %     figure(3)
 %     ShowStereoImage(UndistortStereoImage(GetStereoImages(mailbox, stereo_channel, true), camera_model));
-    status = update_status(status,curSlam,x_ellipse);
-    if status == 5
+    
+    old_status = flags.status;
+    flags.status = update_status(flags.status,curSlam,x_ellipse);
+    if(old_status ~= flags.status)
+        planStepCount = 2;
+        flags.needPlan = 1;
+        oldPlan = [];
+    end
+    
+    
+    if flags.status == 5
         break
     end
     
     if flags.needPlan == 1 && ~isempty(lastScan)
         [obstacle_ranges, obstacle_angles] = thresh_detect(lastScan,obsThresh);
         obstacles = [obstacle_ranges obstacle_angles];
-        [plan, flags.badStart] = planner(curSlam,obstacles,oldPlan,planStepCount,status,x_ellipse);
+        [plan, flags.badStart] = planner2(curSlam,obstacles,oldPlan,planStepCount,flags.status,x_ellipse);
         oldPlan = plan;
-        planStepCount = 1;
+        planStepCount = 2;
         flags.needPlan = 0;
         figure(1)
         subplot(1,2,2)

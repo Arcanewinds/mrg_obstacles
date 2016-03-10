@@ -32,8 +32,13 @@ if forward == -1
     else
         thetaDesired = thetaDesired - pi;
     end
+    thetaDelta = thetaDesired-thetaSlam;
+    if thetaDelta < -5*pi/6
+        thetaDelta = thetaDelta + 2*pi;
+    end
+else
+    thetaDelta = thetaDesired-thetaSlam;
 end
-thetaDelta = thetaDesired-thetaSlam;
 distDelta  = sqrt((Xplan(planStepCount,1)-xSlam)^2 + (Xplan(planStepCount,2)-ySlam)^2);
 % distDelta = norm(Xplan(i,:) - [xSlam ySlam]);
  

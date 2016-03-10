@@ -1,5 +1,5 @@
 function [plan, badStart] = planner2(curSlam, obstacles_in, old_plan, planStepCount, status, x_ellipse)
-obstacle_radius = 0.4;
+obstacle_radius = 0.5;
 plotting = false;
 % n_rand_points = 1000;
 
@@ -7,7 +7,7 @@ x_vehicle = curSlam.vpose;
 
 switch status
     case 1
-        x_target = [2 0];
+        x_target = [-1 0];
     case 2
         x_target = [x_vehicle(1) + x_ellipse(1)*cos(x_ellipse(2) + x_vehicle(3)), ...
                     x_vehicle(2) + x_ellipse(1)*sin(x_ellipse(2) + x_vehicle(3))];
@@ -28,31 +28,34 @@ x_obstacles = [x_obstacles y_obstacles];
 
 % If I have an old plan, check if target unchanged and still works.
 trying_old_plans = true;
+if planStepCount+1 > size(old_plan,1)
+    trying_old_plans = false;
+end
 if ~isempty(old_plan) && trying_old_plans
     old_plan_good = true;
-    if norm(x_vehicle(1:2)' - old_plan(planStepCount,:)) > 0.5
-        old_plan_good = false;
-    end
     if old_plan(end,:) ~= x_target
         old_plan_good = false;
+    elseif norm(x_vehicle(1:2)' - old_plan(planStepCount,:)) > 0.5
+        old_plan_good = false;
     end
-    
-    for i=1:n_obstacles
-        seg = [x_vehicle(1:2)' old_plan(planStepCount,:)];
-        intersect_pts = intersectLineCircle(seg, ...
-                                      [x_obstacles(i,:) obstacle_radius]);
-        if ~isnan(intersect_pts(1)) && in_segment(intersect_pts,seg)
-            old_plan_good = false;
-        end
-        old_plan_blocked = false;
-        for j=planStepCount:size(old_plan,1)
-            if norm(old_plan(j,:) - x_obstacles(i,:)) < obstacle_radius
+    if old_plan_good
+        for i=1:n_obstacles
+            seg = [x_vehicle(1:2)' old_plan(planStepCount,:)];
+            intersect_pts = intersectLineCircle(seg, ...
+                                          [x_obstacles(i,:) obstacle_radius]);
+            if ~isnan(intersect_pts(1)) && in_segment(intersect_pts,seg)
                 old_plan_good = false;
-                old_plan_blocked = true;
             end
-        end
-        if old_plan_blocked
-            disp('plan changed due to blockage');
+            old_plan_blocked = false;
+            for j=planStepCount:size(old_plan,1)
+                if norm(old_plan(j,:) - x_obstacles(i,:)) < obstacle_radius
+                    old_plan_good = false;
+                    old_plan_blocked = true;
+                end
+            end
+            if old_plan_blocked
+                disp('plan changed due to blockage');
+            end
         end
     end
     
