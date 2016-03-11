@@ -2,12 +2,12 @@ function [plan, badStart] = planner2(curSlam, obstacles_in, old_plan, planStepCo
 obstacle_radius = 0.5;
 plotting = false;
 % n_rand_points = 1000;
-
+global endzone;
 x_vehicle = curSlam.vpose;
 
 switch status
     case 1
-        x_target = [-1 0];
+        x_target = [endzone 0];
     case 2
         x_target = [x_vehicle(1) + x_ellipse(1)*cos(x_ellipse(2) + x_vehicle(3)), ...
                     x_vehicle(2) + x_ellipse(1)*sin(x_ellipse(2) + x_vehicle(3))];
@@ -103,7 +103,11 @@ n_points = size(x_points,1);
 badStart = 0;
 for i=1:n_obstacles
     if norm(x_vehicle(1:2)' - x_obstacles(i,:)) < obstacle_radius
-        badStart = 1;
+        if(atan((x_obstacles(i,2)-ySlam)/(x_obstacles(i,1)-xSlam)) > 0)
+            badStart = 1;
+        else
+            badStart = 2;
+        end
         disp('DISASTER');
     end
 end

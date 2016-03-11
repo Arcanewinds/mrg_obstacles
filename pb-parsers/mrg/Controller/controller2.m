@@ -14,7 +14,8 @@
 
 function [newStepCount, flags] = controller2(channels,Xplan,curSlam,velocity,omega,planStepCount,inflags)
 % 2 stage plan
-
+pathDev = 0.2;
+angleDev = pi/6;
 planLength = 6;
 newStepCount = planStepCount;
 flags = inflags;
@@ -43,13 +44,16 @@ distDelta  = sqrt((Xplan(planStepCount,1)-xSlam)^2 + (Xplan(planStepCount,2)-ySl
 % distDelta = norm(Xplan(i,:) - [xSlam ySlam]);
  
 if flags.badStart == 1
-    SendSpeedCommand(-0.2, 0.0, channels.control_channel);
+    SendSpeedCommand(-0.5, 0.5, channels.control_channel);
+    flags.needPlan = 1;
+elseif flags.badStart == 2
+    SendSpeedCommand(-0.5, -0.5, channels.control_channel);
     flags.needPlan = 1;
 else
     %% Drive straight
     % Drive until Slam position = path position
 
-    if abs(thetaDelta) > pi/6 && distDelta > 0.3
+    if abs(thetaDelta) > angleDev && distDelta > pathDev
         sgn = sign(thetaDelta);% Negative is anticlockwise (Left)
         omega = min(0.5 * abs(thetaDelta),0.49);
         SendSpeedCommand(0.0, sgn * omega, channels.control_channel);
@@ -59,7 +63,7 @@ else
         %% Drive straight
         % Drive until Slam position = path position
 
-    elseif distDelta > 0.3
+    elseif distDelta > pathDev
         velocity = min(0.49,distDelta);
         SendSpeedCommand(velocity, 0.0, channels.control_channel)
         %         pause(0.1);
