@@ -7,9 +7,8 @@ scanDat = scanDat.scanData1;
 addpath('mrg');
 addpath('mrg/Detection');
 
-
 load('BB2-14366960.mat');
-targetDat = load('../../targets/target_stats.mat');
+targetDat = load('mrg/Detection/targets/target_stats.mat');
 targetDat = targetDat.targetDat;
 
 

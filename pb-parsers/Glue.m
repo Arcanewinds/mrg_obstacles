@@ -186,7 +186,6 @@ while true
         end
     end
     
-    
     stereo_images = GetStereoImages(mailbox, channels.stereo_channel, true);
     if (~isempty(stereo_images))
         count2 = count2 + 1;
