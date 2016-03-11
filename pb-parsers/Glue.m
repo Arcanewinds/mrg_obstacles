@@ -56,6 +56,10 @@ oldPlan = [];
 polePos = [];
 
 planStepCount = 2;
+
+global endzone;
+endzone = 11;
+
 % status:
 %   1: explore forward
 %   2: go to target
@@ -85,7 +89,10 @@ while true
 %     else
 %         pause(0.1);
     end
+    
 % %     x_ellipse = target_detector(stereo);
+% check ellipse position over 10m
+
     [curSlam, new_feature] = slam(polePos, mailbox, channels.pose_channel, lastSlam);
     lastSlam = curSlam;
     
