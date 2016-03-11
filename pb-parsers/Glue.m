@@ -120,6 +120,10 @@ while true
         if flags.status == 3
             lastSlam.vpose(3) = lastSlam.vpose(3) + pi/6;
         end
+        if(flags.status == 4)
+            lastSlam.features = [];
+            lastSlam.covariance = lastSlam.covariance(1:3,1:3);
+        end
     end
     
     if flags.status == 5
@@ -163,10 +167,7 @@ while true
         [planStepCount, flags] = controller2(channels,plan,curSlam,velocity,omega,planStepCount,flags);
     end
     
-%     if(flags.status == 3)
-%         lastSlam.features = [];
-%         lastSlam.covariance = lastSlam.covariance(1:3,1:3);
-%     end
+
     
     
     
