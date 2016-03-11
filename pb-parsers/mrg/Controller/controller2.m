@@ -15,12 +15,20 @@
 function [newStepCount, flags] = controller2(channels,Xplan,curSlam,velocity,omega,planStepCount,inflags)
 % 2 stage plan
 pathDev = 0.2;
-angleDev = pi/6;
+angleDev = pi/8;
 planLength = 6;
 newStepCount = planStepCount;
 flags = inflags;
+thetaSlam = curSlam.vpose(3);
+xSlam = curSlam.vpose(1); ySlam = curSlam.vpose(2); 
+% xSlam = curSlam.vpose(1) - .37 * cos(thetaSlam); ySlam = curSlam.vpose(2) - .37 * sin(thetaSlam); 
 
-xSlam = curSlam.vpose(1); ySlam = curSlam.vpose(2); thetaSlam = curSlam.vpose(3);
+if flags.status == 3
+    thetaDelta = pi - abs(thetaSlam);
+    SendSpeedCommand(0, -.5, channels.control_channel);
+    newStepCount = 2;
+    return 
+end
 
 %% ROTATE
 % Rotate until Slam angle = path angle
@@ -44,10 +52,10 @@ distDelta  = sqrt((Xplan(planStepCount,1)-xSlam)^2 + (Xplan(planStepCount,2)-ySl
 % distDelta = norm(Xplan(i,:) - [xSlam ySlam]);
  
 if flags.badStart == 1
-    SendSpeedCommand(-0.5, 0.5, channels.control_channel);
+    SendSpeedCommand(-0.4, -0.5, channels.control_channel);
     flags.needPlan = 1;
 elseif flags.badStart == 2
-    SendSpeedCommand(-0.5, -0.5, channels.control_channel);
+    SendSpeedCommand(-0.4, 0.5, channels.control_channel);
     flags.needPlan = 1;
 else
     %% Drive straight
@@ -70,8 +78,10 @@ else
     else
         newStepCount = planStepCount+1;
         SendSpeedCommand(0, 0, channels.control_channel)
-        if newStepCount >= planLength || newStepCount > size(Xplan,1)
-            flags.needPlan = 1;
+        if flags.status ~= 3
+            if newStepCount >= planLength || newStepCount > size(Xplan,1)
+                flags.needPlan = 1;
+            end
         end
     end
 end

@@ -58,14 +58,15 @@ polePos = [];
 planStepCount = 2;
 
 global endzone;
-endzone = 11;
+endzone = 2;
 
 % status:
 %   1: explore forward
 %   2: go to target
-%   3: go to -0.5,0
-%   4: park
-%   5: terminal
+%   3: turn around
+%   4: go to -0.5,0
+%   5: park
+%   6: terminal
 %   0: EMERGENCY, TODO
 flags.status = 1;
 x_ellipse = [];
@@ -116,6 +117,9 @@ while true
         planStepCount = 2;
         flags.needPlan = 1;
         oldPlan = [];
+        if flags.status == 3
+            lastSlam.vpose(3) = lastSlam.vpose(3) + pi/6;
+        end
     end
     
     
@@ -123,7 +127,7 @@ while true
         break
     end
     
-    if flags.needPlan == 1 && ~isempty(lastScan)
+    if flags.needPlan == 1 && ~isempty(lastScan) && flags.status ~= 3
         [obstacle_ranges, obstacle_angles] = thresh_detect(lastScan,obsThresh);
         obstacles = [obstacle_ranges obstacle_angles];
         [plan, flags.badStart] = planner2(curSlam,obstacles,oldPlan,planStepCount,flags.status,x_ellipse);
@@ -147,6 +151,16 @@ while true
     if ~isempty(plan)
         [planStepCount, flags] = controller2(channels,plan,curSlam,velocity,omega,planStepCount,flags);
     end
+    
+%     if(flags.status == 3)
+%         lastSlam.features = [];
+%         lastSlam.covariance = lastSlam.covariance(1:3,1:3);
+%     end
+    
+    
+    
+    
+    
 %     b = [flags.needPlan, planStepCount]
     counter = counter + 1;
     % Display laser scan
@@ -154,7 +168,7 @@ while true
 %         ShowLaserScan(scan);
         %key = get(h.fig,'CurrentKey');
         %if key == 's'
-        poles = pole_cluster(scan);
+%         poles = pole_cluster(scan);
         count1 = count1 + 1;
         if(count1 < 1000)
             scanLog{count1} = scan;
