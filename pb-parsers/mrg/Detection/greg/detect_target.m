@@ -2,15 +2,15 @@ function [x, y] = detect_target(img)
 x = [];
 y = [];
 
-subplot(1,2,1);
-imshow(img);
+% subplot(1,2,1);
+% imshow(img);
 img = mean(img,3);
 img(img < 200) = 0;
 img(1:240,:) = 0;
 img(end-20:end,:) = 0;
 
 bw = im2bw(img,0.5);
-subplot(1,2,2);
+% subplot(1,2,2);
 imshow(bw);
 stats = regionprops(bw,'Centroid','Eccentricity','Solidity',...
     'MajorAxisLength','MinorAxisLength','Orientation','Area');
