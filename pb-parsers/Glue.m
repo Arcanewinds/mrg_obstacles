@@ -123,11 +123,11 @@ while true
     end
     
     stereo_images = GetStereoImages(mailbox, channels.stereo_channel, true);
-    if ~isempty(stereo_images)
+    if ~isempty(stereo_images) && isempty(x_ellipse)
         [e_range, e_angle] = target_from_stereo(stereo_images,camera_model);
         e_x = curSlam.vpose(1) + e_range*cos(e_angle + curSlam.vpose(3));
         e_y = curSlam.vpose(2) + e_range*sin(e_angle + curSlam.vpose(3));
-        if e_x > endzone && e_x < endzone + 3 && abs(e_y) < 5
+        if e_x > endzone && e_x < endzone + 3 && abs(e_y) < 4
             x_ellipse = [e_x, e_y];
         end
     end
