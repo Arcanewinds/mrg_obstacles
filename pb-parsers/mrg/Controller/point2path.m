@@ -1,6 +1,6 @@
 %% 
 
-function dist = point2path(Plan,pathStart)
+function [dist, index] = point2path(Plan,Xr,pathStart)
 
 xp = Plan(:,1);
 yp = Plan(:,2);
@@ -22,6 +22,7 @@ for i = pathStart:length(yp)
     n = cross(a,b);
     sgn = sign(n(3));
     d(i-1) = sgn * norm(cross(a,b)/b_norm); 
+        
     theta(i-1) = asin(d(i-1)/a_norm);
 end
 

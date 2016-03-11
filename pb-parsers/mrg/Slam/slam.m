@@ -5,6 +5,7 @@ function [ xstate, new_feature ] = slam(polePos, mailbox, channel, last_state)
 % xstate.vpose = [x, y, theta]'
 % xstate.features = [range_i, bearing_i]
 % xstate.covariance = (3+N)x(3+N) cov matrix for all features
+% xstate.timestamp
 %%
 % init
 % x = [0; 0; 0;];
@@ -13,6 +14,7 @@ features = last_state.features';
 x = [last_state.vpose; features(:)];
 P = last_state.covariance;
 
+xstate = struct;
 if(~isempty(polePos) && max(polePos(:,1)) > 10)
     polePos(polePos(:,1) > 10,:) = [];
 end
@@ -40,16 +42,18 @@ if ~isempty(visual_odom)
         z = [];
     end
     [x, P, new_feature] = SLAMMeasurement(z, x, P);
+    
+    xstate.timestamp = visual_odom{end}.timestamp;
 else
 %     disp('No Visual Odometry. Cannot SLAM');
     new_feature = false;
+    
+    xstate.timestamp = -1;
 end
 
-xstate = struct;
 xstate.vpose = x(1:3);
 xstate.features = [x(4:2:end),x(5:2:end)];
 xstate.covariance = P;
-
 
 end
 
