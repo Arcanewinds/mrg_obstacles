@@ -40,13 +40,13 @@ im = im2single(image(:,:,:)) ;
 hog = vl_hog(im, hogCellSize) ;
 scores = vl_nnconv(hog, dhog, []) ;
 
-    figure(3) ; clf ;
-    subplot(2,1,1);
-    hold on
-    imagesc(scores) ;
-    title('Detection') ;
-    colorbar ;
-    hold off
+    %figure(3) ; clf ;
+    %subplot(2,1,1);
+    %hold on
+    %imagesc(scores) ;
+    %title('Detection') ;
+    %colorbar ;
+    %hold off
     [best, bestIndex] = max(scores(:)) ;
     
 %     x = floor((bestIndex / size(scores, 1)) * ((width/2) / size(scores, 2)));
@@ -81,9 +81,9 @@ scores = vl_nnconv(hog, dhog, []) ;
 %             image(n,x+6,:,i) = [255, 255, 255];
 %          end
 %     end
-    subplot(2,1,2);
-    imshow(image, 'Border', 'tight');
-    drawnow
+    %subplot(2,1,2);
+    %imshow(image, 'Border', 'tight');
+    %drawnow
 
 end
 
