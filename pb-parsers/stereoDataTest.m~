@@ -1,0 +1,35 @@
+stereoDat = load('../../bigData/logStereo1.mat');
+scanDat = load('logScan1.mat');
+
+stereoDat = stereoDat.stereoData1;
+scanDat = scanDat.scanData1;
+
+addpath('mrg');
+load('BB2-14366960.mat');
+targetDat = load('../../targets/target_stats.mat');
+targetDat = targetDat.targetDat;
+
+
+figure(1)
+len = length(stereoDat);
+for i = 1:1:len
+    %subplot(2,1,1)
+    image = stereoDat{i,1}.left.rgb(:,:,:);
+    image = imresize(image, (heights(1,3) / img_size(i, 1)));
+
+    like1 = normpdf(stereoDat{i,1}.left.rgb(:,:,1), targetDat.mean(1), targetDat.variance(1));
+    like2 = normpdf(stereoDat{i,1}.left.rgb(:,:,2), targetDat.mean(2), targetDat.variance(2));
+    like3 = normpdf(stereoDat{i,1}.left.rgb(:,:,3), targetDat.mean(3), targetDat.variance(3));
+
+
+    [bestEllipses, e] = findellipse(stereoDat{i,1}.left.rgb);
+    normpdf
+    ShowStereoImage(UndistortStereoImage(stereoDat{i,1}, camera_model));
+    %subplot(2,1,2)
+    %ShowLaserScan(scanDat{i,1});
+    %ShowStereoImage(stereoDat{i,1});
+    %num = ((i-1)/4);
+    Filename=strcat('../../bigData/stereoGif/2Frame',num2str(i),'.jpg');
+    saveas(gca,Filename,'jpg');
+    drawnow
+end
