@@ -9,12 +9,11 @@ switch status
     case 1
         x_target = [endzone 0];
     case 2
-        x_target = [x_vehicle(1) + x_ellipse(1)*cos(x_ellipse(2) + x_vehicle(3)), ...
-                    x_vehicle(2) + x_ellipse(1)*sin(x_ellipse(2) + x_vehicle(3))];
+        x_target = x_ellipse;
     case 3
-        x_target = [-.5 0];
+        x_target = [-.4 0];
     case 4
-        x_target = [-.5 0];
+        x_target = [-.4 0];
 end
 
 % r_features = x(4:2:end);

@@ -90,6 +90,10 @@ while true
 %         pause(0.1);
     end
     
+    stereo_images = GetStereoImages(mailbox, stereo_channel, true);
+    if ~isempty(stereo_images)
+        target_from_stereo(stereo_images,camera_model)
+    end
 % %     x_ellipse = target_detector(stereo);
 % check ellipse position over 10m
 
@@ -118,18 +122,9 @@ while true
         oldPlan = [];
     end
     
+    
     if flags.status == 5
         break
-    end
-    
-    stereo_images = GetStereoImages(mailbox, channels.stereo_channel, true);
-    if ~isempty(stereo_images)
-        [e_range, e_angle] = target_from_stereo(stereo_images,camera_model);
-        e_x = curSlam.vpose(1) + e_range*cos(e_angle + curSlam.vpose(3));
-        e_y = curSlam.vpose(2) + e_range*sin(e_angle + curSlam.vpose(3));
-        if e_x > endzone && e_x < endzone + 3 && abs(e_y) < 5
-            x_ellipse = [e_x, e_y];
-        end
     end
     
     if flags.needPlan == 1 && ~isempty(lastScan)

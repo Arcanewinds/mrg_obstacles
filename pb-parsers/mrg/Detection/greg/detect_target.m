@@ -11,7 +11,7 @@ img(end-20:end,:) = 0;
 
 bw = im2bw(img,0.5);
 % subplot(1,2,2);
-imshow(bw);
+% imshow(bw);
 stats = regionprops(bw,'Centroid','Eccentricity','Solidity',...
     'MajorAxisLength','MinorAxisLength','Orientation','Area');
 centers = [];
