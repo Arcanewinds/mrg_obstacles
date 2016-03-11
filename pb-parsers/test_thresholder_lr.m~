@@ -1,0 +1,25 @@
+% clear all
+close all
+clc
+load logStereo2.mat
+
+figure(1);
+for i = 1:length(stereoData2)
+    % i = 125;
+    s = stereoData2{i};
+    r_img = s.right.rgb;
+    l_img = s.left.rgb;
+    figure(1);
+    [r_r, r_a] = detect_target(r_img);
+    figure(2);
+    [l_r, l_a] = detect_target(l_img);
+    figure(3);
+    clf
+    hold on
+    if ~isempty(r_r)
+        scatter([r_r*cos(r_a), l_r*cos(l_a)],[r_r*sin(r_a), l_r*sin(l_a)]);
+
+    end
+    drawnow;
+    pause(0.1);
+end

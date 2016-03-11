@@ -1,5 +1,4 @@
-function [range, angle] = project_geom(x, y)
-    load 'BB2-14366960.mat'
+function [range, angle] = project_geom(x, y, camera_model)
     f = camera_model.right.fx;
     cx = camera_model.right.cx;
     cy = camera_model.right.cy;
