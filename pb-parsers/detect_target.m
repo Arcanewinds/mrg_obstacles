@@ -4,12 +4,38 @@ y = [];
 
 subplot(1,2,1);
 imshow(img);
-img = mean(img,3);
-img(img < 200) = 0;
+%img = mean(img,3);
+%img(img < 200) = 0;
 img(1:240,:) = 0;
-img(end-20:end,:) = 0;
+%img(end-20:end,:) = 0;
+%img(1:end/2, :) = 0;
 
-bw = im2bw(img,0.5);
+
+%%% Color Filter
+targetDat = load('mrg/Detection/targets/target_stats.mat');
+targetDat = targetDat.targetDat;
+image_like = zeros(size(img,1), size(img,2));
+    for m = 1:size(image,1)
+        for n = 1:size(image,2)
+             like1 = normpdf(image(m,n,1), targetDat.mean(1), targetDat.variance(1));
+             if(like1 > 1)
+                like2 = normpdf(image(m,n,2), targetDat.mean(2), targetDat.variance(2));
+                like3 = normpdf(image(m,n,3), targetDat.mean(3), targetDat.variance(3));
+             else
+                 like2 = 0; like3 = 0;
+             end
+             image_like(m,n) = (like1 + like2 + like3)/3; %%Avg Likelihood for Channels
+        end
+    end
+    [row, col] = find(image_like(:,:) < 1.5); %% THRESHOLD FOR COLOR LIKELIHOOD
+    for m = 1:size(row,1)
+        img(row(m), col(m), :) = 0;
+    end
+    bw = im2bw(img, 0.5);
+%%%
+
+
+%bw = im2bw(img,0.5);
 subplot(1,2,2);
 imshow(bw);
 stats = regionprops(bw,'Centroid','Eccentricity','Solidity',...

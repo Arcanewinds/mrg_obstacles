@@ -7,7 +7,7 @@ close all
 addpath(genpath('mrg'));
 
 % Load camera model
-load('BB2-14200208.mat');
+load('BB2-14366960.mat');
     
 % Set up MOOS channel names
 channels.laser_channel   = 'LMS1xx_14320092_laser2d';
@@ -122,9 +122,20 @@ while true
         end
     end
     
-    
     if flags.status == 5
         break
+    end
+    
+    stereo_images = GetStereoImages(mailbox, channels.stereo_channel, true);
+    if ~isempty(stereo_images) && isempty(x_ellipse)
+        [e_range, e_angle] = target_from_stereo(stereo_images,camera_model);
+        if e_range ~= 0 && e_angle ~= 0
+            e_x = curSlam.vpose(1) + e_range*cos(e_angle + curSlam.vpose(3));
+            e_y = curSlam.vpose(2) + e_range*sin(e_angle + curSlam.vpose(3));
+            if e_x > endzone && e_x < endzone + 3 && abs(e_y) < 4
+                x_ellipse = [e_x, e_y];
+            end
+        end
     end
     
     if flags.needPlan == 1 && ~isempty(lastScan) && flags.status ~= 3
@@ -199,7 +210,6 @@ while true
               poseLog{count4} = curSlam;
         end
     end
-    
     
     stereo_images = GetStereoImages(mailbox, channels.stereo_channel, true);
     if (~isempty(stereo_images))
