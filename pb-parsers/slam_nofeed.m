@@ -61,7 +61,7 @@ if ~isempty(visual_odom)
         z = [];
     end
 
-    [x, P] = SLAMMeasurement(z, x, P);
+    [x, P, new_feature] = SLAMMeasurement(z, x, P);
 else
     disp('No Visual Odometry. Cannot SLAM');
 end

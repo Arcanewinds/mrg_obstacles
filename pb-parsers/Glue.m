@@ -58,7 +58,7 @@ polePos = [];
 planStepCount = 2;
 
 global endzone;
-endzone = 2;
+endzone = 11;
 
 % status:
 %   1: explore forward
@@ -106,7 +106,7 @@ while true
     hold on
     plot(curSlam.vpose(1), -curSlam.vpose(2),'rx');
     scatter(curSlam.features(:,1),-curSlam.features(:,2),'wo');
-    axis([-10,10,-10,10])
+    axis([-5,15,-10,10])
     hold off
 %     figure(3)
 %     ShowStereoImage(UndistortStereoImage(GetStereoImages(mailbox, stereo_channel, true), camera_model));
@@ -118,11 +118,15 @@ while true
         flags.needPlan = 1;
         oldPlan = [];
         if flags.status == 3
-            lastSlam.vpose(3) = lastSlam.vpose(3) + pi/6;
+            lastSlam.vpose(3) = lastSlam.vpose(3) + .9* pi/6;
         end
         if(flags.status == 4)
             lastSlam.features = [];
-            lastSlam.covariance = lastSlam.covariance(1:3,1:3);
+            lastSlam.covariance = 0.0005 * diag([1,1,0.01]);
+
+%             lastSlam.covariance = lastSlam.covariance(1:3,1:3);
+            figure(1)
+            clf
         end
     end
     
@@ -136,8 +140,13 @@ while true
         if e_range ~= 0 && e_angle ~= 0
             e_x = curSlam.vpose(1) + e_range*cos(e_angle + curSlam.vpose(3));
             e_y = curSlam.vpose(2) + e_range*sin(e_angle + curSlam.vpose(3));
-            if e_x > endzone && e_x < endzone + 3 && abs(e_y) < 4
-                x_ellipse = [e_x, e_y];
+            if e_x > endzone && e_x < endzone + 3 && abs(e_y) < 2.2
+%                 x_ellipse = [e_x, e_y];
+                figure(1)
+                subplot(1,2,2)
+                hold on
+                plot(e_x,e_y,'y+')
+                hold off
             end
         end
     end

@@ -24,10 +24,13 @@ xSlam = curSlam.vpose(1); ySlam = curSlam.vpose(2);
 % xSlam = curSlam.vpose(1) - .37 * cos(thetaSlam); ySlam = curSlam.vpose(2) - .37 * sin(thetaSlam); 
 
 if flags.status == 3
-    thetaDelta = pi - abs(thetaSlam);
+%     thetaDelta = pi - abs(thetaSlam);
     SendSpeedCommand(0, -.5, channels.control_channel);
     newStepCount = 2;
     return 
+elseif flags.status == 6
+    SendSpeedCommand(0, -.5, channels.control_channel);
+    return
 end
 
 %% ROTATE

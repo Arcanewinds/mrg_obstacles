@@ -9,18 +9,20 @@ switch old_status
             status = 2
         end
     case 2
-%             CHECK IF ARRIVED AT TARGET
+        if norm(curSlam.vpose(1:2) - x_ellipse) < 0.2
+            status = 3
+        end
     case 3
         if curSlam.vpose(3) > pi/2
             status = 4
         end
     case 4
-        if norm(curSlam.vpose(1:2) - [-0.5; 0]) < 0.2
+        if norm(curSlam.vpose(1:2) - [-2; 0]) < 0.2
             status = 5
         end
     case 5
-        if (norm(curSlam.vpose(1:2) - [-0.5; 0]) < 0.2) ...
-                && mod((curSlam.vpose(3) - pi),2*pi) < pi/8
+        if (norm(curSlam.vpose(1:2) - [-2; 0]) < 0.2) ...
+                && mod((curSlam.vpose(3) + pi),2*pi) < pi/18
             status = 6
         end
     case 6

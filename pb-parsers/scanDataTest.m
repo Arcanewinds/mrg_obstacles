@@ -1,10 +1,10 @@
-scanDat = load('../../bigData/scanData3.mat');
-scanDat = scanDat.scanLog;
-addpath('mrg');
+scanData = load('./pb-parsers/logScan2.mat');
+scanData = scanData.scanData2;
+% addpath('mrg');
 close all
 figure(1)
-for i = 1:length(scanDat)
-    scan = scanDat{i, 1};
+for i = 1:length(scanData)
+    scan = scanData{i, 1};
     if(~isempty(scan))
         poles = pole_cluster(scan);
         ShowLaserScan(scan);  

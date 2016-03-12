@@ -1,5 +1,5 @@
 function [plan, badStart] = planner2(curSlam, obstacles_in, old_plan, planStepCount, status, x_ellipse)
-obstacle_radius = 0.5;
+obstacle_radius = 0.6;
 plotting = false;
 % n_rand_points = 1000;
 global endzone;
@@ -13,9 +13,9 @@ switch status
     case 3
         x_target = x_vehicle(1:2)' - [1 0];
     case 4
-        x_target = [-.5 0];
+        x_target = [-2 0];
     case 5
-        x_target = [-.5 0];
+        x_target = [-2 0];
 end
 
 % r_features = x(4:2:end);
